@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/state/qivo_providers.dart';
 import '../../../core/theme/qivo_colours.dart';
 import '../../../core/utils/responsive.dart';
+import '../../../models/conversation_state.dart';
 import '../../shell/qivo_components.dart';
 
 class ListeningPanel extends ConsumerWidget {
@@ -51,7 +52,13 @@ class ListeningPanel extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          _MoodLineIndicator(
+            current: live.conversationState,
+            compact: isMobile,
+            animate: !settings.reduceAnimations,
+          ),
+          const SizedBox(height: 18),
           if (isMobile)
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,6 +132,112 @@ class ListeningPanel extends ConsumerWidget {
       ListeningStatus.finished => 'Start new',
       _ => 'Restart',
     };
+  }
+}
+
+class _MoodLineIndicator extends StatelessWidget {
+  const _MoodLineIndicator({
+    required this.current,
+    required this.compact,
+    required this.animate,
+  });
+
+  final ConversationState current;
+  final bool compact;
+  final bool animate;
+
+  @override
+  Widget build(BuildContext context) {
+    final states = ConversationState.values;
+
+    return Semantics(
+      label: 'Current conversation state is ${current.label}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Conversation state',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: QivoColours.border,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  current.label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: current.color,
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Row(
+            children: [
+              for (var index = 0; index < states.length; index++) ...[
+                Expanded(
+                  child: _MoodSegment(
+                    state: states[index],
+                    selected: states[index] == current,
+                    compact: compact,
+                    animate: animate,
+                  ),
+                ),
+                if (index != states.length - 1) const SizedBox(width: 5),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MoodSegment extends StatelessWidget {
+  const _MoodSegment({
+    required this.state,
+    required this.selected,
+    required this.compact,
+    required this.animate,
+  });
+
+  final ConversationState state;
+  final bool selected;
+  final bool compact;
+  final bool animate;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: animate ? const Duration(milliseconds: 240) : Duration.zero,
+      height: selected ? (compact ? 9 : 10) : (compact ? 6 : 7),
+      decoration: BoxDecoration(
+        color: selected ? state.color : state.color.withOpacity(0.22),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: selected ? state.color : state.color.withOpacity(0.18),
+        ),
+        boxShadow: selected
+            ? [
+                BoxShadow(
+                  color: state.color.withOpacity(0.28),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
+      ),
+    );
   }
 }
 
