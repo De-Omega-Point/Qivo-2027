@@ -23,7 +23,7 @@ class QivoTheme {
       ),
       textTheme: textTheme,
       dividerColor: QivoColours.border,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: QivoColours.surface,
         elevation: settings.lowStimulusMode ? 0 : 12,
         shadowColor: Colors.black.withOpacity(0.28),
