@@ -1,0 +1,9 @@
+{
+  "name": "Qivo",
+  "short_name": "Qivo",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#07111F",
+  "theme_color": "#2563EB",
+  "description": "Real-time AI conversation support."
+}
