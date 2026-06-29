@@ -18,6 +18,13 @@ class ListeningPanel extends ConsumerWidget {
     final active = live.status == ListeningStatus.listening ||
         live.status == ListeningStatus.processing ||
         live.status == ListeningStatus.suggesting;
+    void primaryAction() {
+      if (live.status == ListeningStatus.paused) {
+        controller.resume();
+      } else {
+        controller.start();
+      }
+    }
 
     return QivoCard(
       gradient: true,
@@ -49,20 +56,10 @@ class ListeningPanel extends ConsumerWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ElevatedButton.icon(
-                  icon: Icon(
-                    live.status == ListeningStatus.paused
-                        ? Icons.play_arrow_rounded
-                        : Icons.mic_rounded,
-                  ),
+                _LogoMicButton(
+                  active: active,
                   label: Text(_primaryLabel(live.status)),
-                  onPressed: () {
-                    if (live.status == ListeningStatus.paused) {
-                      controller.resume();
-                    } else {
-                      controller.start();
-                    }
-                  },
+                  onPressed: primaryAction,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -92,21 +89,13 @@ class ListeningPanel extends ConsumerWidget {
             Wrap(
               spacing: 10,
               runSpacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                ElevatedButton.icon(
-                  icon: Icon(
-                    live.status == ListeningStatus.paused
-                        ? Icons.play_arrow_rounded
-                        : Icons.mic_rounded,
-                  ),
+                _LogoMicButton(
+                  active: active,
                   label: Text(_primaryLabel(live.status)),
-                  onPressed: () {
-                    if (live.status == ListeningStatus.paused) {
-                      controller.resume();
-                    } else {
-                      controller.start();
-                    }
-                  },
+                  onPressed: primaryAction,
+                  compact: true,
                 ),
                 OutlinedButton.icon(
                   icon: const Icon(Icons.pause_rounded),
@@ -136,6 +125,100 @@ class ListeningPanel extends ConsumerWidget {
       ListeningStatus.finished => 'Start new',
       _ => 'Restart',
     };
+  }
+}
+
+class _LogoMicButton extends StatelessWidget {
+  const _LogoMicButton({
+    required this.active,
+    required this.label,
+    required this.onPressed,
+    this.compact = false,
+  });
+
+  final bool active;
+  final Widget label;
+  final VoidCallback onPressed;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final logoSize = compact ? 42.0 : 58.0;
+
+    return Material(
+      color: active
+          ? QivoColours.liveGreen.withOpacity(0.10)
+          : QivoColours.primaryBlue.withOpacity(0.16),
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: compact ? 54 : 68,
+            minWidth: compact ? 190 : 0,
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 14 : 16,
+            vertical: compact ? 8 : 10,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: active
+                  ? QivoColours.liveGreen.withOpacity(0.48)
+                  : QivoColours.aqua.withOpacity(0.34),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+            mainAxisAlignment:
+                compact ? MainAxisAlignment.start : MainAxisAlignment.center,
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  QivoLogo(size: logoSize),
+                  Positioned(
+                    right: -4,
+                    bottom: -4,
+                    child: Container(
+                      width: compact ? 20 : 24,
+                      height: compact ? 20 : 24,
+                      decoration: BoxDecoration(
+                        color: active
+                            ? QivoColours.liveGreen
+                            : QivoColours.surfaceElevated,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: QivoColours.textPrimary.withOpacity(0.28),
+                        ),
+                      ),
+                      child: Icon(
+                        active
+                            ? Icons.graphic_eq_rounded
+                            : Icons.mic_none_rounded,
+                        color: active
+                            ? QivoColours.background
+                            : QivoColours.aqua,
+                        size: compact ? 13 : 15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: DefaultTextStyle.merge(
+                  style: Theme.of(context).textTheme.labelLarge,
+                  child: label,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

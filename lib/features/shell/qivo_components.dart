@@ -31,12 +31,23 @@ class QivoLogo extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        'Q',
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontSize: size * 0.52,
-              fontWeight: FontWeight.w900,
-            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.22),
+        child: Image.asset(
+          'assets/images/qivo_logo.png',
+          width: size * 0.72,
+          height: size * 0.72,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) {
+            return Text(
+              'Q',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontSize: size * 0.52,
+                    fontWeight: FontWeight.w900,
+                  ),
+            );
+          },
+        ),
       ),
     );
   }
