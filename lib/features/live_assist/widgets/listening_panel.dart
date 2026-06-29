@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/state/qivo_providers.dart';
 import '../../../core/theme/qivo_colours.dart';
+import '../../../core/utils/responsive.dart';
 import '../../shell/qivo_components.dart';
 
 class ListeningPanel extends ConsumerWidget {
@@ -13,6 +14,7 @@ class ListeningPanel extends ConsumerWidget {
     final live = ref.watch(liveAssistProvider);
     final controller = ref.read(liveAssistProvider.notifier);
     final settings = ref.watch(settingsProvider);
+    final isMobile = Responsive.isMobile(context);
     final active = live.status == ListeningStatus.listening ||
         live.status == ListeningStatus.processing ||
         live.status == ListeningStatus.suggesting;
@@ -43,39 +45,83 @@ class ListeningPanel extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              ElevatedButton.icon(
-                icon: Icon(
-                  live.status == ListeningStatus.paused
-                      ? Icons.play_arrow_rounded
-                      : Icons.mic_rounded,
+          if (isMobile)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(
+                    live.status == ListeningStatus.paused
+                        ? Icons.play_arrow_rounded
+                        : Icons.mic_rounded,
+                  ),
+                  label: Text(_primaryLabel(live.status)),
+                  onPressed: () {
+                    if (live.status == ListeningStatus.paused) {
+                      controller.resume();
+                    } else {
+                      controller.start();
+                    }
+                  },
                 ),
-                label: Text(_primaryLabel(live.status)),
-                onPressed: () {
-                  if (live.status == ListeningStatus.paused) {
-                    controller.resume();
-                  } else {
-                    controller.start();
-                  }
-                },
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.pause_rounded),
-                label: const Text('Pause'),
-                onPressed: active ? controller.pause : null,
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.stop_rounded),
-                label: const Text('End conversation'),
-                onPressed: live.status == ListeningStatus.idle
-                    ? null
-                    : controller.finish,
-              ),
-            ],
-          ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.pause_rounded),
+                        label: const Text('Pause'),
+                        onPressed: active ? controller.pause : null,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.stop_rounded),
+                        label: const Text('End'),
+                        onPressed: live.status == ListeningStatus.idle
+                            ? null
+                            : controller.finish,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          else
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(
+                    live.status == ListeningStatus.paused
+                        ? Icons.play_arrow_rounded
+                        : Icons.mic_rounded,
+                  ),
+                  label: Text(_primaryLabel(live.status)),
+                  onPressed: () {
+                    if (live.status == ListeningStatus.paused) {
+                      controller.resume();
+                    } else {
+                      controller.start();
+                    }
+                  },
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.pause_rounded),
+                  label: const Text('Pause'),
+                  onPressed: active ? controller.pause : null,
+                ),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.stop_rounded),
+                  label: const Text('End conversation'),
+                  onPressed: live.status == ListeningStatus.idle
+                      ? null
+                      : controller.finish,
+                ),
+              ],
+            ),
           const SizedBox(height: 16),
           PrivacyNotice(text: live.privacyMessage),
         ],

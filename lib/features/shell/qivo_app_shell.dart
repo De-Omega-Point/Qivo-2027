@@ -50,7 +50,12 @@ class QivoAppShell extends ConsumerWidget {
                             maxWidth: Responsive.maxContentWidth(context),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(isMobile ? 16 : 24),
+                            padding: EdgeInsets.fromLTRB(
+                              isMobile ? 12 : 24,
+                              isMobile ? 12 : 24,
+                              isMobile ? 12 : 24,
+                              isMobile ? 20 : 24,
+                            ),
                             child: _screenFor(selected),
                           ),
                         ),

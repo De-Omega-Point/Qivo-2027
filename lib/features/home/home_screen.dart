@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/state/qivo_providers.dart';
 import '../../core/theme/qivo_colours.dart';
+import '../../core/utils/responsive.dart';
 import '../shell/qivo_components.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -12,6 +13,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summaries = ref.watch(summariesProvider);
+    final isMobile = Responsive.isMobile(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -19,7 +21,7 @@ class HomeScreen extends ConsumerWidget {
         children: [
           QivoCard(
             gradient: true,
-            padding: const EdgeInsets.all(26),
+            padding: EdgeInsets.all(isMobile ? 18 : 26),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final compact = constraints.maxWidth < 720;
@@ -27,10 +29,10 @@ class HomeScreen extends ConsumerWidget {
                   direction: compact ? Axis.vertical : Axis.horizontal,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const QivoLogo(size: 64),
-                    SizedBox(width: compact ? 0 : 24, height: compact ? 18 : 0),
+                    QivoLogo(size: compact ? 50 : 64),
+                    SizedBox(width: compact ? 0 : 24, height: compact ? 14 : 0),
                     if (compact)
-                      _HeroCopy(ref: ref)
+                      _HeroCopy(ref: ref, compact: true)
                     else
                       Expanded(child: _HeroCopy(ref: ref)),
                   ],
@@ -38,7 +40,7 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: isMobile ? 12 : 18),
           LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 840;
@@ -69,7 +71,10 @@ class HomeScreen extends ConsumerWidget {
               if (compact) {
                 return Column(
                   children: [
-                    for (final card in cards) ...[card, const SizedBox(height: 12)],
+                    for (final card in cards) ...[
+                      card,
+                      const SizedBox(height: 10),
+                    ],
                   ],
                 );
               }
@@ -85,7 +90,7 @@ class HomeScreen extends ConsumerWidget {
               );
             },
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: isMobile ? 8 : 18),
           QivoCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,7 +121,7 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: isMobile ? 12 : 18),
           const PrivacyNotice(
             text: 'You control what is saved. Raw audio is off by default.',
           ),
@@ -127,18 +132,23 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HeroCopy extends StatelessWidget {
-  const _HeroCopy({required this.ref});
+  const _HeroCopy({required this.ref, this.compact = false});
 
   final WidgetRef ref;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
+    final titleStyle = compact
+        ? Theme.of(context).textTheme.headlineMedium
+        : Theme.of(context).textTheme.displaySmall;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Find the right words in real time.',
-          style: Theme.of(context).textTheme.displaySmall,
+          style: titleStyle,
         ),
         const SizedBox(height: 10),
         Text(
@@ -148,25 +158,44 @@ class _HeroCopy extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 22),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            ElevatedButton.icon(
-              icon: const Icon(Icons.graphic_eq_rounded),
-              label: const Text('Start Live Assist'),
-              onPressed: () =>
-                  ref.read(selectedNavProvider.notifier).state =
-                      QivoNavItem.liveAssist,
-            ),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.edit_note_rounded),
-              label: const Text('Prep first'),
-              onPressed: () =>
-                  ref.read(selectedNavProvider.notifier).state = QivoNavItem.prep,
-            ),
-          ],
-        ),
+        if (compact)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.graphic_eq_rounded),
+                label: const Text('Start Live Assist'),
+                onPressed: () => ref.read(selectedNavProvider.notifier).state =
+                    QivoNavItem.liveAssist,
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.edit_note_rounded),
+                label: const Text('Prep first'),
+                onPressed: () =>
+                    ref.read(selectedNavProvider.notifier).state = QivoNavItem.prep,
+              ),
+            ],
+          )
+        else
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              ElevatedButton.icon(
+                icon: const Icon(Icons.graphic_eq_rounded),
+                label: const Text('Start Live Assist'),
+                onPressed: () => ref.read(selectedNavProvider.notifier).state =
+                    QivoNavItem.liveAssist,
+              ),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.edit_note_rounded),
+                label: const Text('Prep first'),
+                onPressed: () =>
+                    ref.read(selectedNavProvider.notifier).state = QivoNavItem.prep,
+              ),
+            ],
+          ),
       ],
     );
   }
@@ -187,22 +216,52 @@ class _ModeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = Responsive.isMobile(context);
+
     return QivoCard(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(2),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: QivoColours.aqua, size: 30),
-              const SizedBox(height: 14),
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(body, style: Theme.of(context).textTheme.bodyMedium),
-            ],
-          ),
+          child: compact
+              ? Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: QivoColours.aqua.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(icon, color: QivoColours.aqua, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(title,
+                              style: Theme.of(context).textTheme.titleMedium),
+                          const SizedBox(height: 4),
+                          Text(body, style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, color: QivoColours.aqua, size: 30),
+                    const SizedBox(height: 14),
+                    Text(title, style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    Text(body, style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                ),
         ),
       ),
     );

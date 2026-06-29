@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/state/qivo_providers.dart';
 import '../../core/theme/qivo_colours.dart';
+import '../../core/utils/responsive.dart';
 import '../shell/qivo_components.dart';
 import 'widgets/conversation_state_panel.dart';
 import 'widgets/listening_panel.dart';
@@ -17,6 +18,7 @@ class LiveAssistScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final live = ref.watch(liveAssistProvider);
+    final isMobile = Responsive.isMobile(context);
     final compact = MediaQuery.sizeOf(context).width < 960;
 
     final suggestions = QivoCard(
@@ -44,35 +46,55 @@ class LiveAssistScreen extends ConsumerWidget {
       ),
     );
 
+    final reviewCta = live.status == ListeningStatus.finished
+        ? Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: QivoCard(
+              child: isMobile
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.fact_check_rounded,
+                                color: QivoColours.aqua),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text('Ready to review what happened.'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () => _saveAndReview(ref, live),
+                          child: const Text('Review'),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        const Icon(Icons.fact_check_rounded,
+                            color: QivoColours.aqua),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text('Ready to review what happened.'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => _saveAndReview(ref, live),
+                          child: const Text('Review'),
+                        ),
+                      ],
+                    ),
+            ),
+          )
+        : const SizedBox.shrink();
+
     final mainColumn = Column(
       children: [
         const ListeningPanel(),
         const SizedBox(height: 16),
         const TranscriptPanel(),
-        if (live.status == ListeningStatus.finished) ...[
-          const SizedBox(height: 16),
-          QivoCard(
-            child: Row(
-              children: [
-                const Icon(Icons.fact_check_rounded, color: QivoColours.aqua),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text('Ready to review what happened.'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    ref
-                        .read(summariesProvider.notifier)
-                        .saveFromLiveAssist(live.transcript);
-                    ref.read(selectedNavProvider.notifier).state =
-                        QivoNavItem.review;
-                  },
-                  child: const Text('Review'),
-                ),
-              ],
-            ),
-          ),
-        ],
+        reviewCta,
       ],
     );
 
@@ -90,9 +112,16 @@ class LiveAssistScreen extends ConsumerWidget {
       child: compact
           ? Column(
               children: [
-                mainColumn,
+                const ListeningPanel(),
                 const SizedBox(height: 16),
-                insightColumn,
+                suggestions,
+                const SizedBox(height: 16),
+                const QuickActionsPanel(),
+                const SizedBox(height: 16),
+                const TranscriptPanel(),
+                const SizedBox(height: 16),
+                const ConversationStatePanel(),
+                reviewCta,
               ],
             )
           : Row(
@@ -104,5 +133,10 @@ class LiveAssistScreen extends ConsumerWidget {
               ],
             ),
     );
+  }
+
+  void _saveAndReview(WidgetRef ref, LiveAssistState live) {
+    ref.read(summariesProvider.notifier).saveFromLiveAssist(live.transcript);
+    ref.read(selectedNavProvider.notifier).state = QivoNavItem.review;
   }
 }

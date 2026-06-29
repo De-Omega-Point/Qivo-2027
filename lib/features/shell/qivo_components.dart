@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/state/qivo_providers.dart';
 import '../../core/theme/qivo_colours.dart';
+import '../../core/utils/responsive.dart';
 
 class QivoLogo extends StatelessWidget {
   const QivoLogo({super.key, this.size = 42});
@@ -56,10 +57,13 @@ class QivoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    final radius = BorderRadius.circular(18);
+    final isMobile = Responsive.isMobile(context);
+    final radius = BorderRadius.circular(isMobile ? 16 : 18);
 
     return Container(
-      padding: padding,
+      padding: isMobile && padding == const EdgeInsets.all(20)
+          ? const EdgeInsets.all(16)
+          : padding,
       decoration: BoxDecoration(
         color: QivoColours.surface,
         borderRadius: radius,
@@ -80,8 +84,8 @@ class QivoCard extends ConsumerWidget {
             : [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.22),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
+                  blurRadius: isMobile ? 14 : 24,
+                  offset: Offset(0, isMobile ? 8 : 12),
                 ),
               ],
       ),
