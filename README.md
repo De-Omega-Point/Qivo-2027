@@ -43,3 +43,22 @@ Future backend integration points are isolated behind services:
 - Speaker recognition and voice enrolment can enrich `TranscriptMessage`.
 - Supabase auth, storage, and secure history replace `ConversationStore`.
 - Stripe subscription can be added at the shell/account boundary without changing core Live Assist UX.
+
+## AI Proxy
+
+The app includes a deployable Groq proxy in `backend/`. It keeps `GROQ_API_KEY`
+server-side and exposes:
+
+- `GET /health`
+- `POST /v1/chat/completions`
+- `POST /v1/audio/transcriptions`
+
+Run it locally with:
+
+```bash
+cd backend
+GROQ_API_KEY=your_key npm start
+```
+
+After deploying the proxy, add `QIVO_AI_PROXY_URL` as a GitHub repository
+variable so the Pages workflow builds the Flutter app against the live backend.

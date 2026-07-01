@@ -22,6 +22,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Test AI proxy
+        working-directory: backend
+        run: npm test
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -32,7 +36,16 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release --base-href /Qivo-2027/
+        env:
+          QIVO_AI_PROXY_URL: ${{ vars.QIVO_AI_PROXY_URL }}
+          QIVO_AI_MODEL: ${{ vars.QIVO_AI_MODEL || 'openai/gpt-oss-20b' }}
+          QIVO_STT_MODEL: ${{ vars.QIVO_STT_MODEL || 'whisper-large-v3-turbo' }}
+        run: >
+          flutter build web --release
+          --base-href /Qivo-2027/
+          --dart-define=QIVO_AI_PROXY_URL="$QIVO_AI_PROXY_URL"
+          --dart-define=QIVO_AI_MODEL="$QIVO_AI_MODEL"
+          --dart-define=QIVO_STT_MODEL="$QIVO_STT_MODEL"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

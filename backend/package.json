@@ -1,0 +1,15 @@
+{
+  "name": "qivo-ai-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Small Groq proxy for Qivo live assist.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

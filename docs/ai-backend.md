@@ -20,7 +20,7 @@ This keeps the app cheap to test while protecting the live-assist experience fro
 
 Do not put a Groq API key directly into the Flutter web app. Browser builds expose client-side secrets.
 
-Use a small backend proxy that:
+Use the included `backend/` proxy or another small backend that:
 
 - Stores `GROQ_API_KEY` server-side.
 - Accepts requests from the Qivo web app.
@@ -42,10 +42,17 @@ If `QIVO_AI_PROXY_URL` is not provided, Qivo stays in mock offline mode.
 
 ## Proxy Contract
 
-The Flutter app sends `POST` requests to:
+The Flutter app sends chat `POST` requests to:
 
 ```text
 {QIVO_AI_PROXY_URL}/v1/chat/completions
+```
+
+The proxy also exposes a speech-to-text pass-through endpoint for the next
+microphone build:
+
+```text
+{QIVO_AI_PROXY_URL}/v1/audio/transcriptions
 ```
 
 The proxy should accept OpenAI-compatible chat completion bodies and return the normal OpenAI-compatible response:
@@ -65,3 +72,35 @@ The proxy should accept OpenAI-compatible chat completion bodies and return the 
 ## Next Model Route
 
 After Groq is working, DeepSeek V4 Flash is the best cheap quality fallback for review summaries and harder reasoning moments.
+
+## Deploying The Included Proxy
+
+The backend is dependency-free Node.js and can run on any cheap/free Node host
+that supports environment variables.
+
+Required environment variables:
+
+- `GROQ_API_KEY`: server-side Groq key.
+- `QIVO_ALLOWED_ORIGINS`: comma-separated browser origins, for example `https://de-omega-point.github.io`.
+
+Optional environment variables:
+
+- `PORT`: default `8787`.
+- `QIVO_GROQ_BASE_URL`: default `https://api.groq.com/openai/v1`.
+- `QIVO_MAX_BODY_BYTES`: default `26214400`.
+
+Local smoke test:
+
+```sh
+cd backend
+GROQ_API_KEY=your_key npm start
+curl http://localhost:8787/health
+```
+
+After the proxy is deployed, set the GitHub repository variable:
+
+```text
+QIVO_AI_PROXY_URL=https://your-qivo-backend.example.com
+```
+
+The GitHub Pages workflow will pass that URL into the Flutter web build.
