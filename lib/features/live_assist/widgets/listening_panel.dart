@@ -34,7 +34,10 @@ class ListeningPanel extends ConsumerWidget {
         children: [
           Row(
             children: [
-              _Pulse(active: active && !settings.reduceAnimations),
+              _StateDot(
+                color: _statusColor(live.status),
+                active: active && !settings.reduceAnimations,
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -64,8 +67,9 @@ class ListeningPanel extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _LogoMicButton(
-                  active: active,
-                  label: Text(_primaryLabel(live.status)),
+                  status: live.status,
+                  label: _primaryLabel(live.status),
+                  hint: _primaryHint(live.status),
                   onPressed: primaryAction,
                 ),
                 const SizedBox(height: 10),
@@ -99,8 +103,9 @@ class ListeningPanel extends ConsumerWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 _LogoMicButton(
-                  active: active,
-                  label: Text(_primaryLabel(live.status)),
+                  status: live.status,
+                  label: _primaryLabel(live.status),
+                  hint: _primaryHint(live.status),
                   onPressed: primaryAction,
                   compact: true,
                 ),
@@ -131,6 +136,28 @@ class ListeningPanel extends ConsumerWidget {
       ListeningStatus.paused => 'Resume',
       ListeningStatus.finished => 'Start new',
       _ => 'Restart',
+    };
+  }
+
+  String _primaryHint(ListeningStatus status) {
+    return switch (status) {
+      ListeningStatus.idle => 'Tap the logo to begin',
+      ListeningStatus.listening => 'Live. Tap to restart',
+      ListeningStatus.processing => 'Checking options',
+      ListeningStatus.suggesting => 'Suggestions ready',
+      ListeningStatus.paused => 'Tap the logo to resume',
+      ListeningStatus.finished => 'Tap for a new session',
+    };
+  }
+
+  Color _statusColor(ListeningStatus status) {
+    return switch (status) {
+      ListeningStatus.idle => QivoColours.aqua,
+      ListeningStatus.listening => QivoColours.liveGreen,
+      ListeningStatus.processing => QivoColours.aqua,
+      ListeningStatus.suggesting => QivoColours.violet,
+      ListeningStatus.paused => QivoColours.warningAmber,
+      ListeningStatus.finished => QivoColours.mutedText,
     };
   }
 }
@@ -243,45 +270,58 @@ class _MoodSegment extends StatelessWidget {
 
 class _LogoMicButton extends StatelessWidget {
   const _LogoMicButton({
-    required this.active,
+    required this.status,
     required this.label,
+    required this.hint,
     required this.onPressed,
     this.compact = false,
   });
 
-  final bool active;
-  final Widget label;
+  final ListeningStatus status;
+  final String label;
+  final String hint;
   final VoidCallback onPressed;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final logoSize = compact ? 42.0 : 58.0;
+    final color = _statusColor(status);
+    final active = status == ListeningStatus.listening ||
+        status == ListeningStatus.processing ||
+        status == ListeningStatus.suggesting;
+    final logoSize = compact ? 42.0 : 72.0;
+    final borderRadius = BorderRadius.circular(compact ? 18 : 24);
 
     return Material(
-      color: active
-          ? QivoColours.liveGreen.withOpacity(0.10)
-          : QivoColours.primaryBlue.withOpacity(0.16),
-      borderRadius: BorderRadius.circular(18),
+      color: color.withOpacity(active ? 0.14 : 0.10),
+      borderRadius: borderRadius,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: borderRadius,
         child: Container(
           constraints: BoxConstraints(
-            minHeight: compact ? 54 : 68,
+            minHeight: compact ? 54 : 104,
             minWidth: compact ? 190 : 0,
           ),
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 14 : 16,
-            vertical: compact ? 8 : 10,
+            horizontal: compact ? 14 : 18,
+            vertical: compact ? 8 : 14,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: borderRadius,
             border: Border.all(
-              color: active
-                  ? QivoColours.liveGreen.withOpacity(0.48)
-                  : QivoColours.aqua.withOpacity(0.34),
+              color: color.withOpacity(active ? 0.62 : 0.42),
+              width: active ? 1.4 : 1,
             ),
+            boxShadow: active
+                ? [
+                    BoxShadow(
+                      color: color.withOpacity(0.18),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
@@ -296,12 +336,10 @@ class _LogoMicButton extends StatelessWidget {
                     right: -4,
                     bottom: -4,
                     child: Container(
-                      width: compact ? 20 : 24,
-                      height: compact ? 20 : 24,
+                      width: compact ? 20 : 28,
+                      height: compact ? 20 : 28,
                       decoration: BoxDecoration(
-                        color: active
-                            ? QivoColours.liveGreen
-                            : QivoColours.surfaceElevated,
+                        color: color,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: QivoColours.textPrimary.withOpacity(0.28),
@@ -311,10 +349,8 @@ class _LogoMicButton extends StatelessWidget {
                         active
                             ? Icons.graphic_eq_rounded
                             : Icons.mic_none_rounded,
-                        color: active
-                            ? QivoColours.background
-                            : QivoColours.aqua,
-                        size: compact ? 13 : 15,
+                        color: QivoColours.background,
+                        size: compact ? 13 : 17,
                       ),
                     ),
                   ),
@@ -322,9 +358,30 @@ class _LogoMicButton extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Flexible(
-                child: DefaultTextStyle.merge(
-                  style: Theme.of(context).textTheme.labelLarge,
-                  child: label,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: compact
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: QivoColours.textPrimary,
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (!compact) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        hint,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: QivoColours.textSecondary,
+                            ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -333,11 +390,23 @@ class _LogoMicButton extends StatelessWidget {
       ),
     );
   }
+
+  Color _statusColor(ListeningStatus status) {
+    return switch (status) {
+      ListeningStatus.idle => QivoColours.aqua,
+      ListeningStatus.listening => QivoColours.liveGreen,
+      ListeningStatus.processing => QivoColours.aqua,
+      ListeningStatus.suggesting => QivoColours.violet,
+      ListeningStatus.paused => QivoColours.warningAmber,
+      ListeningStatus.finished => QivoColours.mutedText,
+    };
+  }
 }
 
-class _Pulse extends StatelessWidget {
-  const _Pulse({required this.active});
+class _StateDot extends StatelessWidget {
+  const _StateDot({required this.color, required this.active});
 
+  final Color color;
   final bool active;
 
   @override
@@ -348,21 +417,20 @@ class _Pulse extends StatelessWidget {
       curve: Curves.easeInOut,
       builder: (context, value, child) {
         return Container(
-          width: 58,
-          height: 58,
+          width: 42,
+          height: 42,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: active
-                ? QivoColours.liveGreen.withOpacity(0.12 + value * 0.12)
-                : QivoColours.surfaceElevated,
+            color: color.withOpacity(active ? 0.10 + value * 0.10 : 0.08),
             border: Border.all(
-              color: active ? QivoColours.liveGreen : QivoColours.border,
+              color: active ? color : QivoColours.border,
               width: 1.4,
             ),
           ),
           child: Icon(
             active ? Icons.graphic_eq_rounded : Icons.mic_none_rounded,
-            color: active ? QivoColours.liveGreen : QivoColours.textSecondary,
+            color: active ? color : QivoColours.textSecondary,
+            size: 20,
           ),
         );
       },

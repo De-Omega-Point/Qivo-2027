@@ -82,8 +82,8 @@ class QivoCard extends ConsumerWidget {
         gradient: gradient && !settings.lowStimulusMode
             ? LinearGradient(
                 colors: [
-                  QivoColours.primaryBlue.withOpacity(0.24),
-                  QivoColours.violet.withOpacity(0.20),
+                  QivoColours.primaryBlue.withOpacity(0.16),
+                  QivoColours.violet.withOpacity(0.10),
                   QivoColours.surface,
                 ],
                 begin: Alignment.topLeft,
