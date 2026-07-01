@@ -61,6 +61,13 @@ class ListeningPanel extends ConsumerWidget {
             compact: isMobile,
             animate: !settings.reduceAnimations,
           ),
+          const SizedBox(height: 8),
+          Text(
+            live.localInsightMessage,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.qivoPalette.textSecondary,
+                ),
+          ),
           const SizedBox(height: 18),
           if (isMobile)
             Column(

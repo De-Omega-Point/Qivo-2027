@@ -10,9 +10,11 @@ import '../../models/transcript_message.dart';
 import '../../services/ai_backend_config.dart';
 import '../../services/browser_speech_transcription_service.dart';
 import '../../services/groq_ai_response_service.dart';
+import '../../services/local_template_ai_response_service.dart';
 import '../../services/mock_ai_response_service.dart';
 import '../../services/mock_conversation_service.dart';
 import '../../services/mock_transcription_service.dart';
+import '../../services/transformers_local_intelligence_service.dart';
 import '../constants/app_constants.dart';
 
 final selectedNavProvider = StateProvider<QivoNavItem>((ref) => QivoNavItem.home);
@@ -35,16 +37,46 @@ final aiBackendConfigProvider = Provider<AiBackendConfig>(
 );
 
 final aiResponseServiceProvider = Provider<AiResponseService>((ref) {
+  final settings = ref.watch(settingsProvider);
   final config = ref.watch(aiBackendConfigProvider);
-  final fallback = MockAIResponseService();
+  final localFallback = LocalTemplateAiResponseService();
 
-  if (!config.isConfigured) return fallback;
+  if (settings.aiMode == QivoAiMode.localPrivate) return localFallback;
+
+  if (!config.isConfigured) return localFallback;
 
   return GroqAiResponseService(
     config: config,
-    fallback: fallback,
+    fallback: localFallback,
   );
 });
+
+final localIntelligenceServiceProvider = Provider<LocalIntelligenceService>(
+  (ref) => TransformersLocalIntelligenceService(),
+);
+
+enum QivoAiMode {
+  hybrid(
+    'Hybrid recommended',
+    'Local pressure detection with backend suggestions when available.',
+    'Hybrid',
+  ),
+  localPrivate(
+    'Local private',
+    'Browser intelligence and local response templates. No cloud suggestions.',
+    'Local',
+  ),
+  cloudQuality(
+    'Cloud quality',
+    'Use the configured backend for stronger suggestions, with local fallback.',
+    'Cloud',
+  );
+
+  const QivoAiMode(this.label, this.description, this.shortLabel);
+  final String label;
+  final String description;
+  final String shortLabel;
+}
 
 class QivoSettings {
   const QivoSettings({
@@ -55,6 +87,7 @@ class QivoSettings {
     this.saveTranscript = true,
     this.saveSummaries = true,
     this.themeMode = 'Dark',
+    this.aiMode = QivoAiMode.hybrid,
     this.localAiEnabled = false,
     this.localAiProxyUrl = 'http://localhost:8787',
     this.localAiModel = 'openai/gpt-oss-20b',
@@ -68,6 +101,7 @@ class QivoSettings {
   final bool saveTranscript;
   final bool saveSummaries;
   final String themeMode;
+  final QivoAiMode aiMode;
   final bool localAiEnabled;
   final String localAiProxyUrl;
   final String localAiModel;
@@ -89,6 +123,7 @@ class QivoSettings {
     bool? saveTranscript,
     bool? saveSummaries,
     String? themeMode,
+    QivoAiMode? aiMode,
     bool? localAiEnabled,
     String? localAiProxyUrl,
     String? localAiModel,
@@ -102,6 +137,7 @@ class QivoSettings {
       saveTranscript: saveTranscript ?? this.saveTranscript,
       saveSummaries: saveSummaries ?? this.saveSummaries,
       themeMode: themeMode ?? this.themeMode,
+      aiMode: aiMode ?? this.aiMode,
       localAiEnabled: localAiEnabled ?? this.localAiEnabled,
       localAiProxyUrl: localAiProxyUrl ?? this.localAiProxyUrl,
       localAiModel: localAiModel ?? this.localAiModel,
@@ -124,6 +160,7 @@ class SettingsController extends StateNotifier<QivoSettings> {
   void updateSaveSummaries(bool value) =>
       state = state.copyWith(saveSummaries: value);
   void updateThemeMode(String value) => state = state.copyWith(themeMode: value);
+  void updateAiMode(QivoAiMode value) => state = state.copyWith(aiMode: value);
   void updateLocalAiEnabled(bool value) =>
       state = state.copyWith(localAiEnabled: value);
   void updateLocalAiProxyUrl(String value) =>
@@ -138,7 +175,17 @@ final liveAssistProvider =
     StateNotifierProvider<LiveAssistController, LiveAssistState>((ref) {
   final controller = LiveAssistController(
     transcriptionService: BrowserSpeechTranscriptionService(),
-    aiResponseService: ref.watch(aiResponseServiceProvider),
+    aiResponseService: ref.read(aiResponseServiceProvider),
+    localIntelligenceService: ref.read(localIntelligenceServiceProvider),
+    aiMode: ref.read(settingsProvider).aiMode,
+  );
+  ref.listen<AiResponseService>(
+    aiResponseServiceProvider,
+    (_, service) => controller.updateAiResponseService(service),
+  );
+  ref.listen<QivoAiMode>(
+    settingsProvider.select((settings) => settings.aiMode),
+    (_, mode) => controller.updateAiMode(mode),
   );
   ref.onDispose(controller.dispose);
   return controller;
@@ -164,6 +211,8 @@ class LiveAssistState {
     this.suggestions = const [],
     this.privacyMessage =
         'Mic audio is used for live transcription. Raw audio is not saved by Qivo.',
+    this.localInsightMessage =
+        'Hybrid mode watches pressure locally before suggestions are generated.',
   });
 
   final ListeningStatus status;
@@ -171,6 +220,7 @@ class LiveAssistState {
   final ConversationState conversationState;
   final List<AiSuggestion> suggestions;
   final String privacyMessage;
+  final String localInsightMessage;
 
   LiveAssistState copyWith({
     ListeningStatus? status,
@@ -178,6 +228,7 @@ class LiveAssistState {
     ConversationState? conversationState,
     List<AiSuggestion>? suggestions,
     String? privacyMessage,
+    String? localInsightMessage,
   }) {
     return LiveAssistState(
       status: status ?? this.status,
@@ -185,6 +236,7 @@ class LiveAssistState {
       conversationState: conversationState ?? this.conversationState,
       suggestions: suggestions ?? this.suggestions,
       privacyMessage: privacyMessage ?? this.privacyMessage,
+      localInsightMessage: localInsightMessage ?? this.localInsightMessage,
     );
   }
 }
@@ -193,17 +245,38 @@ class LiveAssistController extends StateNotifier<LiveAssistState> {
   LiveAssistController({
     required TranscriptionService transcriptionService,
     required AiResponseService aiResponseService,
+    required LocalIntelligenceService localIntelligenceService,
+    required QivoAiMode aiMode,
   })  : _transcriptionService = transcriptionService,
         _aiResponseService = aiResponseService,
+        _localIntelligenceService = localIntelligenceService,
+        _aiMode = aiMode,
         super(const LiveAssistState());
 
   final TranscriptionService _transcriptionService;
-  final AiResponseService _aiResponseService;
+  AiResponseService _aiResponseService;
+  final LocalIntelligenceService _localIntelligenceService;
+  QivoAiMode _aiMode;
   StreamSubscription<TranscriptMessage>? _subscription;
+  int _analysisRequest = 0;
+
+  void updateAiResponseService(AiResponseService service) {
+    _aiResponseService = service;
+  }
+
+  void updateAiMode(QivoAiMode mode) {
+    _aiMode = mode;
+    state = state.copyWith(
+      localInsightMessage: _messageForMode(mode),
+    );
+  }
 
   void start() {
     _subscription?.cancel();
-    state = const LiveAssistState(status: ListeningStatus.listening);
+    state = LiveAssistState(
+      status: ListeningStatus.listening,
+      localInsightMessage: _messageForMode(_aiMode),
+    );
     _subscription = _transcriptionService.stream.listen(_handleTranscript);
     _transcriptionService.start();
   }
@@ -243,7 +316,7 @@ class LiveAssistController extends StateNotifier<LiveAssistState> {
 
   void reset() {
     _transcriptionService.stop();
-    state = const LiveAssistState();
+    state = LiveAssistState(localInsightMessage: _messageForMode(_aiMode));
   }
 
   void setConversationState(ConversationState value) {
@@ -269,8 +342,38 @@ class LiveAssistController extends StateNotifier<LiveAssistState> {
       conversationState: nextState,
     );
 
-    if (transcript.length.isEven) {
+    if (_aiMode != QivoAiMode.cloudQuality) {
+      unawaited(
+        _applyLocalInsight(
+          transcript,
+          refreshSuggestions: transcript.length.isEven,
+        ),
+      );
+    } else if (transcript.length.isEven) {
       unawaited(_loadSuggestions(nextState));
+    }
+  }
+
+  Future<void> _applyLocalInsight(
+    List<TranscriptMessage> transcript, {
+    required bool refreshSuggestions,
+  }) async {
+    final request = ++_analysisRequest;
+    final recentText = transcript
+        .skip(transcript.length > 8 ? transcript.length - 8 : 0)
+        .map((message) => message.text)
+        .join('\n');
+    final insight = await _localIntelligenceService.analyze(recentText);
+    if (request != _analysisRequest || state.status == ListeningStatus.finished) {
+      return;
+    }
+
+    state = state.copyWith(
+      conversationState: insight.conversationState,
+      localInsightMessage: insight.statusMessage,
+    );
+    if (refreshSuggestions) {
+      await _loadSuggestions(insight.conversationState);
     }
   }
 
@@ -290,6 +393,14 @@ class LiveAssistController extends StateNotifier<LiveAssistState> {
   ConversationState _stateForTranscript(int count) {
     final states = ConversationState.values;
     return states[(count ~/ 2) % states.length];
+  }
+
+  String _messageForMode(QivoAiMode mode) {
+    return mode == QivoAiMode.cloudQuality
+        ? 'Cloud quality mode prioritises backend suggestions with local fallback.'
+        : mode == QivoAiMode.localPrivate
+            ? 'Local private mode keeps pressure checks and suggestions on this device.'
+            : 'Hybrid mode watches pressure locally before suggestions are generated.';
   }
 
   @override

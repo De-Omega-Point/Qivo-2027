@@ -65,7 +65,32 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 SectionHeader(
                   title: 'AI backend',
-                  subtitle: backend.connectionLabel,
+                  subtitle: settings.aiMode.description,
+                ),
+                const SizedBox(height: 12),
+                SegmentedButton<QivoAiMode>(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(
+                      value: QivoAiMode.hybrid,
+                      label: Text('Hybrid'),
+                      icon: Icon(Icons.hub_rounded),
+                    ),
+                    ButtonSegment(
+                      value: QivoAiMode.localPrivate,
+                      label: Text('Local'),
+                      icon: Icon(Icons.lock_outline_rounded),
+                    ),
+                    ButtonSegment(
+                      value: QivoAiMode.cloudQuality,
+                      label: Text('Cloud'),
+                      icon: Icon(Icons.cloud_queue_rounded),
+                    ),
+                  ],
+                  selected: {settings.aiMode},
+                  onSelectionChanged: (selection) => ref
+                      .read(settingsProvider.notifier)
+                      .updateAiMode(selection.first),
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -73,15 +98,33 @@ class SettingsScreen extends ConsumerWidget {
                   runSpacing: 8,
                   children: [
                     QivoStatusBadge(
-                      label: backend.providerName,
-                      color: QivoColours.aqua,
-                      icon: Icons.bolt_rounded,
+                      label: settings.aiMode.shortLabel,
+                      color: _modeColor(settings.aiMode),
+                      icon: _modeIcon(settings.aiMode),
                     ),
-                    QivoStatusBadge(
-                      label: backend.model,
-                      color: QivoColours.violet,
-                      icon: Icons.auto_awesome_rounded,
-                    ),
+                    if (settings.aiMode == QivoAiMode.localPrivate) ...[
+                      const QivoStatusBadge(
+                        label: 'Built-in local',
+                        color: QivoColours.aqua,
+                        icon: Icons.shield_outlined,
+                      ),
+                      const QivoStatusBadge(
+                        label: 'Templates',
+                        color: QivoColours.violet,
+                        icon: Icons.short_text_rounded,
+                      ),
+                    ] else ...[
+                      QivoStatusBadge(
+                        label: backend.providerName,
+                        color: QivoColours.aqua,
+                        icon: Icons.bolt_rounded,
+                      ),
+                      QivoStatusBadge(
+                        label: backend.model,
+                        color: QivoColours.violet,
+                        icon: Icons.auto_awesome_rounded,
+                      ),
+                    ],
                     if (backend.isLocalOverride)
                       const QivoStatusBadge(
                         label: 'Local test',
@@ -92,7 +135,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  _backendMessage(backend),
+                  _backendMessage(backend, settings.aiMode),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: context.qivoPalette.textSecondary,
                       ),
@@ -142,16 +185,40 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _backendMessage(AiBackendConfig backend) {
+  Color _modeColor(QivoAiMode mode) {
+    return switch (mode) {
+      QivoAiMode.hybrid => QivoColours.aqua,
+      QivoAiMode.localPrivate => QivoColours.liveGreen,
+      QivoAiMode.cloudQuality => QivoColours.violet,
+    };
+  }
+
+  IconData _modeIcon(QivoAiMode mode) {
+    return switch (mode) {
+      QivoAiMode.hybrid => Icons.hub_rounded,
+      QivoAiMode.localPrivate => Icons.lock_outline_rounded,
+      QivoAiMode.cloudQuality => Icons.cloud_queue_rounded,
+    };
+  }
+
+  String _backendMessage(AiBackendConfig backend, QivoAiMode mode) {
+    if (mode == QivoAiMode.localPrivate) {
+      return 'Local private mode keeps Live Assist on browser pressure detection and built-in response templates. The proxy is optional for later testing.';
+    }
+
+    if (mode == QivoAiMode.hybrid && !backend.isConfigured) {
+      return 'Hybrid mode uses local pressure detection now, then upgrades to backend suggestions when a proxy is configured.';
+    }
+
     if (backend.isLocalOverride) {
-      return 'Local-first mode is active. Qivo will call your local proxy and fall back to mock suggestions if the request fails.';
+      return 'The local proxy is active. Qivo will call this device for suggestions and fall back to local templates if the request fails.';
     }
 
     if (backend.isConfigured) {
-      return 'Live suggestions use the configured backend proxy. The mock service remains as a fallback if the request fails.';
+      return 'Live suggestions use the configured backend proxy. Local templates remain as a fallback if the request fails.';
     }
 
-    return 'Free-start mode is selected. Enable Local-first backend below to test the Groq proxy on this device.';
+    return 'No backend proxy is configured yet. Qivo will continue with local pressure detection and built-in suggestions.';
   }
 }
 
@@ -196,16 +263,16 @@ class _LocalBackendControlsState extends ConsumerState<_LocalBackendControls> {
         children: [
           const SectionHeader(
             title: 'Local-first backend',
-            subtitle: 'Use your Mac proxy before deploying anything.',
+            subtitle: 'Optional proxy for Hybrid and Cloud modes.',
           ),
           const SizedBox(height: 12),
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Use local AI proxy'),
+            title: const Text('Use local backend proxy'),
             subtitle: Text(
               settings.localAiEnabled
-                  ? 'Live Assist will call this device first.'
-                  : 'Qivo stays in mock mode until this is enabled.',
+                  ? 'Hybrid and Cloud modes will call this device first.'
+                  : 'Local private mode still works without a proxy.',
             ),
             value: settings.localAiEnabled,
             activeColor: QivoColours.aqua,
@@ -255,7 +322,7 @@ class _LocalBackendControlsState extends ConsumerState<_LocalBackendControls> {
               ),
               TextButton.icon(
                 icon: const Icon(Icons.power_settings_new_rounded),
-                label: const Text('Mock mode'),
+                label: const Text('Proxy off'),
                 onPressed: () => controller.updateLocalAiEnabled(false),
               ),
             ],

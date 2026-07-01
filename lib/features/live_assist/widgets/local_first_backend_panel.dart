@@ -42,8 +42,13 @@ class _LocalFirstBackendPanelState
     final settings = ref.watch(settingsProvider);
     final backend = ref.watch(aiBackendConfigProvider);
     final settingsController = ref.read(settingsProvider.notifier);
-    final enabled = settings.localAiEnabled;
-    final statusColor = enabled ? QivoColours.warningAmber : QivoColours.aqua;
+    final mode = settings.aiMode;
+    final proxyEnabled = settings.localAiEnabled;
+    final statusColor = mode == QivoAiMode.localPrivate
+        ? QivoColours.liveGreen
+        : mode == QivoAiMode.cloudQuality
+            ? QivoColours.violet
+            : QivoColours.aqua;
 
     return QivoCard(
       child: Column(
@@ -51,14 +56,44 @@ class _LocalFirstBackendPanelState
         children: [
           SectionHeader(
             title: 'App AI mode',
-            subtitle: enabled
-                ? 'Local-first is on for this app session.'
-                : 'Qivo is using mock mode until local AI is enabled.',
+            subtitle: mode.description,
             action: Switch.adaptive(
-              value: enabled,
+              value: proxyEnabled,
               activeColor: QivoColours.aqua,
               onChanged: (value) {
                 settingsController.updateLocalAiEnabled(value);
+                setState(() {
+                  _result = null;
+                  _connected = null;
+                });
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<QivoAiMode>(
+              showSelectedIcon: false,
+              segments: const [
+                ButtonSegment(
+                  value: QivoAiMode.hybrid,
+                  label: Text('Hybrid'),
+                  icon: Icon(Icons.hub_rounded),
+                ),
+                ButtonSegment(
+                  value: QivoAiMode.localPrivate,
+                  label: Text('Local'),
+                  icon: Icon(Icons.lock_outline_rounded),
+                ),
+                ButtonSegment(
+                  value: QivoAiMode.cloudQuality,
+                  label: Text('Cloud'),
+                  icon: Icon(Icons.cloud_queue_rounded),
+                ),
+              ],
+              selected: {mode},
+              onSelectionChanged: (selection) {
+                settingsController.updateAiMode(selection.first);
                 setState(() {
                   _result = null;
                   _connected = null;
@@ -72,16 +107,29 @@ class _LocalFirstBackendPanelState
             runSpacing: 8,
             children: [
               QivoStatusBadge(
-                label: enabled ? 'Local AI' : 'Mock safe mode',
+                label: mode.shortLabel,
                 color: statusColor,
-                icon: enabled
+                icon: mode == QivoAiMode.localPrivate
+                    ? Icons.lock_outline_rounded
+                    : mode == QivoAiMode.cloudQuality
+                        ? Icons.cloud_queue_rounded
+                        : Icons.hub_rounded,
+              ),
+              QivoStatusBadge(
+                label: proxyEnabled ? 'Proxy on' : 'Proxy off',
+                color: proxyEnabled ? QivoColours.warningAmber : QivoColours.aqua,
+                icon: proxyEnabled
                     ? Icons.computer_rounded
                     : Icons.shield_outlined,
               ),
               QivoStatusBadge(
-                label: backend.model,
+                label: mode == QivoAiMode.localPrivate
+                    ? 'Built-in lines'
+                    : backend.model,
                 color: QivoColours.violet,
-                icon: Icons.auto_awesome_rounded,
+                icon: mode == QivoAiMode.localPrivate
+                    ? Icons.short_text_rounded
+                    : Icons.auto_awesome_rounded,
               ),
             ],
           ),
@@ -111,7 +159,7 @@ class _LocalFirstBackendPanelState
                       )
                     : const Icon(Icons.wifi_tethering_rounded),
                 label: Text(_checking ? 'Testing' : 'Test proxy'),
-                onPressed: enabled && !_checking ? _testProxy : null,
+                onPressed: proxyEnabled && !_checking ? _testProxy : null,
               ),
               OutlinedButton.icon(
                 icon: const Icon(Icons.computer_rounded),
