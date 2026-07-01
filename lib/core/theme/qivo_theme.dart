@@ -8,41 +8,70 @@ class QivoTheme {
   const QivoTheme._();
 
   static ThemeData dark({required QivoSettings settings}) {
-    final textTheme = QivoTextStyles.textTheme(largerText: settings.largerText);
+    return _theme(
+      settings: settings,
+      brightness: Brightness.dark,
+      palette: QivoPalette.dark,
+    );
+  }
+
+  static ThemeData light({required QivoSettings settings}) {
+    return _theme(
+      settings: settings,
+      brightness: Brightness.light,
+      palette: QivoPalette.light,
+    );
+  }
+
+  static ThemeData _theme({
+    required QivoSettings settings,
+    required Brightness brightness,
+    required QivoPalette palette,
+  }) {
+    final textTheme = QivoTextStyles.textTheme(
+      largerText: settings.largerText,
+      palette: palette,
+    );
+    final isDark = brightness == Brightness.dark;
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: QivoColours.primaryBlue,
+      brightness: brightness,
+    ).copyWith(
+      primary: QivoColours.primaryBlue,
+      secondary: QivoColours.aqua,
+      tertiary: QivoColours.violet,
+      surface: palette.surface,
+      error: QivoColours.dangerRed,
+    );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: QivoColours.background,
-      colorScheme: const ColorScheme.dark(
-        primary: QivoColours.primaryBlue,
-        secondary: QivoColours.aqua,
-        tertiary: QivoColours.violet,
-        surface: QivoColours.surface,
-        error: QivoColours.dangerRed,
-      ),
+      brightness: brightness,
+      scaffoldBackgroundColor: palette.background,
+      extensions: [palette],
+      colorScheme: colorScheme,
       textTheme: textTheme,
-      dividerColor: QivoColours.border,
+      dividerColor: palette.border,
       cardTheme: CardThemeData(
-        color: QivoColours.surface,
+        color: palette.surface,
         elevation: settings.lowStimulusMode ? 0 : 12,
-        shadowColor: Colors.black.withOpacity(0.28),
+        shadowColor: palette.shadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: QivoColours.border),
+          side: BorderSide(color: palette.border),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: QivoColours.surfaceElevated,
+        fillColor: palette.surfaceElevated,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: QivoColours.border),
+          borderSide: BorderSide(color: palette.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: QivoColours.border),
+          borderSide: BorderSide(color: palette.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -55,7 +84,7 @@ class QivoTheme {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           backgroundColor: QivoColours.primaryBlue,
-          foregroundColor: QivoColours.textPrimary,
+          foregroundColor: Colors.white,
           textStyle: textTheme.labelLarge,
         ),
       ),
@@ -64,8 +93,8 @@ class QivoTheme {
           minimumSize: const Size(48, 52),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          side: const BorderSide(color: QivoColours.border),
-          foregroundColor: QivoColours.textPrimary,
+          side: BorderSide(color: palette.border),
+          foregroundColor: palette.textPrimary,
           textStyle: textTheme.labelLarge,
         ),
       ),
@@ -73,13 +102,18 @@ class QivoTheme {
         thumbColor: MaterialStateProperty.resolveWith((states) {
           return states.contains(MaterialState.selected)
               ? QivoColours.aqua
-              : QivoColours.textSecondary;
+              : palette.textSecondary;
         }),
         trackColor: MaterialStateProperty.resolveWith((states) {
           return states.contains(MaterialState.selected)
               ? QivoColours.aqua.withOpacity(0.24)
-              : QivoColours.surfaceElevated;
+              : palette.surfaceElevated;
         }),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: palette.surface,
+        indicatorColor: QivoColours.primaryBlue.withOpacity(isDark ? 0.24 : 0.14),
+        labelTextStyle: MaterialStatePropertyAll(textTheme.labelMedium),
       ),
     );
   }

@@ -14,14 +14,15 @@ class QivoTopBar extends ConsumerWidget {
     final selected = ref.watch(selectedNavProvider);
     final live = ref.watch(liveAssistProvider);
     final isMobile = Responsive.isMobile(context);
+    final palette = context.qivoPalette;
 
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 16 : 22,
         vertical: isMobile ? 10 : 16,
       ),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: QivoColours.border)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.border)),
       ),
       child: Row(
         children: [

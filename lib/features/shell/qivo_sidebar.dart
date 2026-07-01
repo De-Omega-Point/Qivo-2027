@@ -12,13 +12,14 @@ class QivoSidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(selectedNavProvider);
+    final palette = context.qivoPalette;
 
     return Container(
       width: 248,
       padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
-      decoration: const BoxDecoration(
-        color: QivoColours.surface,
-        border: Border(right: BorderSide(color: QivoColours.border)),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        border: Border(right: BorderSide(color: palette.border)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,6 +71,7 @@ class _SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.qivoPalette;
     return Material(
       color: selected ? QivoColours.primaryBlue.withOpacity(0.18) : Colors.transparent,
       borderRadius: BorderRadius.circular(14),
@@ -82,7 +84,7 @@ class _SidebarItem extends StatelessWidget {
             children: [
               Icon(
                 item.icon,
-                color: selected ? QivoColours.aqua : QivoColours.textSecondary,
+                color: selected ? QivoColours.aqua : palette.textSecondary,
                 size: 21,
               ),
               const SizedBox(width: 12),
@@ -91,8 +93,8 @@ class _SidebarItem extends StatelessWidget {
                   item.label,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: selected
-                            ? QivoColours.textPrimary
-                            : QivoColours.textSecondary,
+                            ? palette.textPrimary
+                            : palette.textSecondary,
                       ),
                 ),
               ),

@@ -65,11 +65,13 @@ class _NeedButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final palette = context.qivoPalette;
+
     return OutlinedButton.icon(
       icon: Icon(icon, size: 18),
       label: Text(label, overflow: TextOverflow.ellipsis),
       style: OutlinedButton.styleFrom(
-        foregroundColor: QivoColours.textPrimary,
+        foregroundColor: palette.textPrimary,
         side: BorderSide(color: QivoColours.aqua.withOpacity(0.42)),
         backgroundColor: QivoColours.aqua.withOpacity(0.06),
       ),

@@ -10,13 +10,15 @@ class SuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.qivoPalette;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: QivoColours.surfaceElevated,
+        color: palette.surfaceElevated,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: QivoColours.border),
+        border: Border.all(color: palette.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

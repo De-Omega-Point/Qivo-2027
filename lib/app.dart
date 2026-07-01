@@ -15,7 +15,9 @@ class QivoApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Qivo',
       debugShowCheckedModeBanner: false,
-      theme: QivoTheme.dark(settings: settings),
+      theme: QivoTheme.light(settings: settings),
+      darkTheme: QivoTheme.dark(settings: settings),
+      themeMode: settings.resolvedThemeMode,
       home: const QivoAppShell(),
     );
   }

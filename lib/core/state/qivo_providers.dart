@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/ai_suggestion.dart';
@@ -71,6 +72,14 @@ class QivoSettings {
   final String localAiProxyUrl;
   final String localAiModel;
   final String localSttModel;
+
+  ThemeMode get resolvedThemeMode {
+    return switch (themeMode) {
+      'Light' => ThemeMode.light,
+      'System' => ThemeMode.system,
+      _ => ThemeMode.dark,
+    };
+  }
 
   QivoSettings copyWith({
     bool? lowStimulusMode,

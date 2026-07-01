@@ -177,6 +177,7 @@ class _MoodLineIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final states = ConversationState.values;
+    final palette = context.qivoPalette;
 
     return Semantics(
       label: 'Current conversation pressure is ${current.label}',
@@ -193,7 +194,7 @@ class _MoodLineIndicator extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: 1,
-                  color: QivoColours.border,
+                  color: palette.border,
                 ),
               ),
               const SizedBox(width: 8),
@@ -286,6 +287,7 @@ class _LogoMicButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.qivoPalette;
     final color = _statusColorFor(status);
     final active = status == ListeningStatus.listening ||
         status == ListeningStatus.processing ||
@@ -343,14 +345,14 @@ class _LogoMicButton extends StatelessWidget {
                         color: color,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: QivoColours.textPrimary.withOpacity(0.28),
+                          color: palette.textPrimary.withOpacity(0.28),
                         ),
                       ),
                       child: Icon(
                         active
                             ? Icons.graphic_eq_rounded
                             : Icons.mic_none_rounded,
-                        color: QivoColours.background,
+                        color: palette.background,
                         size: compact ? 13 : 17,
                       ),
                     ),
@@ -368,7 +370,7 @@ class _LogoMicButton extends StatelessWidget {
                     Text(
                       label,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: QivoColours.textPrimary,
+                            color: palette.textPrimary,
                           ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -377,7 +379,7 @@ class _LogoMicButton extends StatelessWidget {
                       Text(
                         hint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: QivoColours.textSecondary,
+                              color: palette.textSecondary,
                             ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -402,6 +404,7 @@ class _StateDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.qivoPalette;
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.72, end: active ? 1 : 0.72),
       duration: active ? const Duration(milliseconds: 900) : Duration.zero,
@@ -414,13 +417,13 @@ class _StateDot extends StatelessWidget {
             shape: BoxShape.circle,
             color: color.withOpacity(active ? 0.10 + value * 0.10 : 0.08),
             border: Border.all(
-              color: active ? color : QivoColours.border,
+              color: active ? color : palette.border,
               width: 1.4,
             ),
           ),
           child: Icon(
             active ? Icons.graphic_eq_rounded : Icons.mic_none_rounded,
-            color: active ? color : QivoColours.textSecondary,
+            color: active ? color : palette.textSecondary,
             size: 20,
           ),
         );

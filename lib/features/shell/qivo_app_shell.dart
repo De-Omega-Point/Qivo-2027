@@ -24,12 +24,13 @@ class QivoAppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isMobile = Responsive.isMobile(context);
     final selected = ref.watch(selectedNavProvider);
+    final palette = context.qivoPalette;
 
     return Scaffold(
       body: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [QivoColours.background, Color(0xFF0A1425)],
+            colors: [palette.background, palette.backgroundEnd],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

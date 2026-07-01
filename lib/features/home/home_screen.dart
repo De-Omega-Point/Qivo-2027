@@ -108,9 +108,12 @@ class HomeScreen extends ConsumerWidget {
                 else
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: QivoColours.surfaceElevated,
-                      child: Icon(Icons.forum_rounded, color: QivoColours.aqua),
+                    leading: CircleAvatar(
+                      backgroundColor: context.qivoPalette.surfaceElevated,
+                      child: const Icon(
+                        Icons.forum_rounded,
+                        color: QivoColours.aqua,
+                      ),
                     ),
                     title: Text(summaries.first.title),
                     subtitle: Text(summaries.first.mainTopic),
@@ -154,7 +157,7 @@ class _HeroCopy extends StatelessWidget {
         Text(
           'Live conversation support for work, study, appointments, and difficult conversations.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: QivoColours.textSecondary,
+                color: context.qivoPalette.textSecondary,
               ),
         ),
         const SizedBox(height: 10),

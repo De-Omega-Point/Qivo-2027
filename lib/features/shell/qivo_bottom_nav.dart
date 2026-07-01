@@ -12,6 +12,7 @@ class QivoBottomNav extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(selectedNavProvider);
+    final palette = context.qivoPalette;
     const mobileItems = [
       QivoNavItem.home,
       QivoNavItem.liveAssist,
@@ -24,7 +25,7 @@ class QivoBottomNav extends ConsumerWidget {
     return NavigationBar(
       height: 72,
       selectedIndex: selectedIndex,
-      backgroundColor: QivoColours.surface,
+      backgroundColor: palette.surface,
       indicatorColor: QivoColours.primaryBlue.withOpacity(0.24),
       destinations: [
         for (final item in mobileItems)
@@ -59,7 +60,7 @@ class QivoBottomNav extends ConsumerWidget {
 
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: QivoColours.surface,
+      backgroundColor: context.qivoPalette.surface,
       showDragHandle: true,
       builder: (context) {
         return SafeArea(

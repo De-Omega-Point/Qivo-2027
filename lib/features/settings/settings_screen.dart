@@ -34,13 +34,13 @@ class SettingsScreen extends ConsumerWidget {
                       icon: Icon(Icons.dark_mode_rounded),
                     ),
                     ButtonSegment(
-                      value: 'Light later',
-                      label: Text('Light later'),
+                      value: 'Light',
+                      label: Text('Light'),
                       icon: Icon(Icons.light_mode_outlined),
                     ),
                     ButtonSegment(
-                      value: 'System later',
-                      label: Text('System later'),
+                      value: 'System',
+                      label: Text('System'),
                       icon: Icon(Icons.devices_rounded),
                     ),
                   ],
@@ -51,9 +51,9 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Dark is active for the MVP. Other modes are shown for the planned settings model.',
+                  'Theme changes apply across the app immediately.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: QivoColours.textSecondary,
+                        color: context.qivoPalette.textSecondary,
                       ),
                 ),
               ],
@@ -94,7 +94,7 @@ class SettingsScreen extends ConsumerWidget {
                 Text(
                   _backendMessage(backend),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: QivoColours.textSecondary,
+                        color: context.qivoPalette.textSecondary,
                       ),
                 ),
               ],

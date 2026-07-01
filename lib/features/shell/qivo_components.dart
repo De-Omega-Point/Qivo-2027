@@ -69,6 +69,7 @@ class QivoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final isMobile = Responsive.isMobile(context);
+    final palette = context.qivoPalette;
     final radius = BorderRadius.circular(isMobile ? 16 : 18);
 
     return Container(
@@ -76,15 +77,15 @@ class QivoCard extends ConsumerWidget {
           ? const EdgeInsets.all(16)
           : padding,
       decoration: BoxDecoration(
-        color: QivoColours.surface,
+        color: palette.surface,
         borderRadius: radius,
-        border: Border.all(color: QivoColours.border),
+        border: Border.all(color: palette.border),
         gradient: gradient && !settings.lowStimulusMode
             ? LinearGradient(
                 colors: [
                   QivoColours.primaryBlue.withOpacity(0.16),
                   QivoColours.violet.withOpacity(0.10),
-                  QivoColours.surface,
+                  palette.surface,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -94,7 +95,7 @@ class QivoCard extends ConsumerWidget {
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.22),
+                  color: palette.shadow,
                   blurRadius: isMobile ? 14 : 24,
                   offset: Offset(0, isMobile ? 8 : 12),
                 ),
@@ -136,7 +137,7 @@ class QivoStatusBadge extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: QivoColours.textPrimary,
+                  color: context.qivoPalette.textPrimary,
                 ),
           ),
         ],
@@ -152,6 +153,7 @@ class PrivacyNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.qivoPalette;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -165,7 +167,12 @@ class PrivacyNotice extends StatelessWidget {
           const Icon(Icons.lock_outline_rounded, color: QivoColours.aqua, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: palette.textSecondary,
+                  ),
+            ),
           ),
         ],
       ),

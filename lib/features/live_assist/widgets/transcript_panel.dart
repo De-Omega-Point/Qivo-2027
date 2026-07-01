@@ -68,6 +68,8 @@ class _TranscriptBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.speaker == TranscriptSpeaker.you;
+    final palette = context.qivoPalette;
+
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -77,9 +79,9 @@ class _TranscriptBubble extends StatelessWidget {
         decoration: BoxDecoration(
           color: isUser
               ? QivoColours.primaryBlue.withOpacity(0.18)
-              : QivoColours.surfaceElevated,
+              : palette.surfaceElevated,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: QivoColours.border),
+          border: Border.all(color: palette.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
