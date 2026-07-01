@@ -8,6 +8,7 @@ import '../../core/utils/responsive.dart';
 import '../shell/qivo_components.dart';
 import 'widgets/conversation_state_panel.dart';
 import 'widgets/listening_panel.dart';
+import 'widgets/local_first_backend_panel.dart';
 import 'widgets/need_now_strip.dart';
 import 'widgets/suggestion_card.dart';
 import 'widgets/transcript_panel.dart';
@@ -61,6 +62,8 @@ class LiveAssistScreen extends ConsumerWidget {
       children: [
         const ListeningPanel(),
         const SizedBox(height: 16),
+        const LocalFirstBackendPanel(),
+        const SizedBox(height: 16),
         const NeedNowStrip(),
         const SizedBox(height: 16),
         const TranscriptPanel(),
@@ -81,6 +84,8 @@ class LiveAssistScreen extends ConsumerWidget {
           ? Column(
               children: [
                 const ListeningPanel(),
+                const SizedBox(height: 16),
+                const LocalFirstBackendPanel(),
                 const SizedBox(height: 16),
                 const NeedNowStrip(),
                 const SizedBox(height: 16),
