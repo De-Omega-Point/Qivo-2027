@@ -57,7 +57,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 DropdownButtonFormField<ConversationState>(
                   value: live.conversationState,
                   decoration: const InputDecoration(
-                    labelText: 'Mock conversation state',
+                    labelText: 'Mock conversation pressure',
                   ),
                   items: [
                     for (final state in ConversationState.values)

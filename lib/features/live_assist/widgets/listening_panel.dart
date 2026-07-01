@@ -151,14 +151,14 @@ class _MoodLineIndicator extends StatelessWidget {
     final states = ConversationState.values;
 
     return Semantics(
-      label: 'Current conversation state is ${current.label}',
+      label: 'Current conversation pressure is ${current.label}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Text(
-                'Conversation state',
+                'Conversation pressure',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(width: 8),

@@ -17,8 +17,8 @@ class ConversationStatePanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionHeader(
-            title: 'Conversation state',
-            subtitle: 'A gentle read of the current moment.',
+            title: 'Conversation pressure',
+            subtitle: 'A gentle read of pace, clarity, and intensity.',
           ),
           const SizedBox(height: 14),
           Wrap(

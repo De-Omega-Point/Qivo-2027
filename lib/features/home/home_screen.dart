@@ -157,6 +157,14 @@ class _HeroCopy extends StatelessWidget {
                 color: QivoColours.textSecondary,
               ),
         ),
+        const SizedBox(height: 10),
+        Text(
+          'Not a meeting recorder. A calm prompt when conversation gets hard.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: QivoColours.aqua,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
         const SizedBox(height: 22),
         if (compact)
           Column(
