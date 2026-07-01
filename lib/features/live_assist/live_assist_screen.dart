@@ -28,14 +28,18 @@ class LiveAssistScreen extends ConsumerWidget {
         children: [
           const SectionHeader(
             title: 'What to say next',
-            subtitle: 'Only three suggestions at a time.',
+            subtitle: 'Fast, short, high-confidence options.',
           ),
           const SizedBox(height: 14),
-          if (live.status == ListeningStatus.processing)
-            const LinearProgressIndicator(minHeight: 3)
-          else if (live.suggestions.isEmpty)
+          if (live.status == ListeningStatus.processing) ...[
+            const LinearProgressIndicator(minHeight: 3),
+            const SizedBox(height: 12),
+          ],
+          if (live.suggestions.isEmpty)
             Text(
-              'Suggestions will appear after Qivo has enough conversation context.',
+              live.status == ListeningStatus.processing
+                  ? 'Preparing useful options...'
+                  : 'Suggestions will appear after Qivo has enough conversation context.',
               style: Theme.of(context).textTheme.bodyMedium,
             )
           else

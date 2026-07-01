@@ -87,7 +87,7 @@ final liveAssistProvider =
 enum ListeningStatus {
   idle('Ready when you are.'),
   listening('Listening privately...'),
-  processing('Finding useful response options...'),
+  processing('Checking the best short options...'),
   suggesting('Response options ready.'),
   paused('Paused. No audio is being processed.'),
   finished('Conversation finished.');

@@ -15,7 +15,7 @@ class MockAIResponseService implements AiResponseService {
     required ConversationState state,
     required List<TranscriptMessage> transcript,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 650));
+    await Future<void>.delayed(const Duration(milliseconds: 240));
 
     final suggestions = switch (state) {
       ConversationState.calm => _calm,

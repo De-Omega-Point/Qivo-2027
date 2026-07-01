@@ -17,7 +17,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   final _injection = TextEditingController(
     text: 'We need to decide whether the demo is ready today.',
   );
-  var _latency = 650.0;
+  var _latency = 240.0;
 
   @override
   void dispose() {
