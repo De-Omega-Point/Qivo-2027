@@ -35,7 +35,7 @@ class ListeningPanel extends ConsumerWidget {
           Row(
             children: [
               _StateDot(
-                color: _statusColor(live.status),
+                color: _statusColorFor(live.status),
                 active: active && !settings.reduceAnimations,
               ),
               const SizedBox(width: 14),
@@ -150,16 +150,17 @@ class ListeningPanel extends ConsumerWidget {
     };
   }
 
-  Color _statusColor(ListeningStatus status) {
-    return switch (status) {
-      ListeningStatus.idle => QivoColours.aqua,
-      ListeningStatus.listening => QivoColours.liveGreen,
-      ListeningStatus.processing => QivoColours.aqua,
-      ListeningStatus.suggesting => QivoColours.violet,
-      ListeningStatus.paused => QivoColours.warningAmber,
-      ListeningStatus.finished => QivoColours.mutedText,
-    };
-  }
+}
+
+Color _statusColorFor(ListeningStatus status) {
+  return switch (status) {
+    ListeningStatus.idle => QivoColours.aqua,
+    ListeningStatus.listening => QivoColours.liveGreen,
+    ListeningStatus.processing => QivoColours.aqua,
+    ListeningStatus.suggesting => QivoColours.violet,
+    ListeningStatus.paused => QivoColours.warningAmber,
+    ListeningStatus.finished => QivoColours.mutedText,
+  };
 }
 
 class _MoodLineIndicator extends StatelessWidget {
@@ -285,7 +286,7 @@ class _LogoMicButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColor(status);
+    final color = _statusColorFor(status);
     final active = status == ListeningStatus.listening ||
         status == ListeningStatus.processing ||
         status == ListeningStatus.suggesting;
@@ -391,16 +392,6 @@ class _LogoMicButton extends StatelessWidget {
     );
   }
 
-  Color _statusColor(ListeningStatus status) {
-    return switch (status) {
-      ListeningStatus.idle => QivoColours.aqua,
-      ListeningStatus.listening => QivoColours.liveGreen,
-      ListeningStatus.processing => QivoColours.aqua,
-      ListeningStatus.suggesting => QivoColours.violet,
-      ListeningStatus.paused => QivoColours.warningAmber,
-      ListeningStatus.finished => QivoColours.mutedText,
-    };
-  }
 }
 
 class _StateDot extends StatelessWidget {

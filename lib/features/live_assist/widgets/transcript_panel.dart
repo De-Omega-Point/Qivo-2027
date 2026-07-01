@@ -20,6 +20,7 @@ class TranscriptPanel extends ConsumerWidget {
           const SectionHeader(
             title: 'Live transcript',
             subtitle: 'Speaker labels stay simple.',
+            action: _SaveMomentButton(),
           ),
           const SizedBox(height: 14),
           if (transcript.isEmpty)
@@ -31,6 +32,29 @@ class TranscriptPanel extends ConsumerWidget {
             for (final message in transcript.take(8).toList().reversed)
               _TranscriptBubble(message: message),
         ],
+      ),
+    );
+  }
+}
+
+class _SaveMomentButton extends ConsumerWidget {
+  const _SaveMomentButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasTranscript = ref.watch(
+      liveAssistProvider.select((state) => state.transcript.isNotEmpty),
+    );
+
+    return Tooltip(
+      message: 'Save moment',
+      child: IconButton.filledTonal(
+        onPressed: hasTranscript
+            ? () => ref
+                .read(liveAssistProvider.notifier)
+                .quickAction('Save moment')
+            : null,
+        icon: const Icon(Icons.bookmark_border_rounded),
       ),
     );
   }

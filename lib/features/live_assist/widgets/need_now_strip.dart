@@ -75,7 +75,6 @@ class _NeedButton extends ConsumerWidget {
       ),
       onPressed: () {
         final action = switch (label) {
-          'Set boundary' => 'Pause phrase',
           'Summarise' => 'Summarise so far',
           _ => label,
         };
