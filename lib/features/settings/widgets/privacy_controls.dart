@@ -20,13 +20,13 @@ class PrivacyControls extends ConsumerWidget {
         children: [
           const SectionHeader(
             title: 'Privacy and data',
-            subtitle: 'Raw audio saving is off by default.',
+            subtitle: 'Mic capture is used for live transcript only.',
           ),
           const SizedBox(height: 12),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Save raw audio'),
-            subtitle: const Text('Default off. No audio is saved in this prototype.'),
+            subtitle: const Text('Default off. Qivo does not store raw audio.'),
             value: settings.saveRawAudio,
             onChanged: controller.updateRawAudio,
           ),

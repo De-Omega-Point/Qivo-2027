@@ -36,7 +36,7 @@ class ReviewScreen extends ConsumerWidget {
                 FollowUpTasks(summary: summary),
                 const SizedBox(height: 16),
                 const PrivacyNotice(
-                  text: 'You can save or delete this summary. Raw audio remains off by default.',
+                  text: 'You can save or delete this summary. Raw audio is not stored by Qivo.',
                 ),
               ],
             );

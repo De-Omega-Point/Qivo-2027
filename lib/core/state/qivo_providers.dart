@@ -7,10 +7,10 @@ import '../../models/conversation_state.dart';
 import '../../models/conversation_summary.dart';
 import '../../models/transcript_message.dart';
 import '../../services/ai_backend_config.dart';
+import '../../services/browser_speech_transcription_service.dart';
 import '../../services/groq_ai_response_service.dart';
 import '../../services/mock_ai_response_service.dart';
 import '../../services/mock_conversation_service.dart';
-import '../../services/mock_transcription_service.dart';
 import '../constants/app_constants.dart';
 
 final selectedNavProvider = StateProvider<QivoNavItem>((ref) => QivoNavItem.home);
@@ -127,7 +127,7 @@ class SettingsController extends StateNotifier<QivoSettings> {
 final liveAssistProvider =
     StateNotifierProvider<LiveAssistController, LiveAssistState>((ref) {
   final controller = LiveAssistController(
-    transcriptionService: MockTranscriptionService(),
+    transcriptionService: BrowserSpeechTranscriptionService(),
     aiResponseService: ref.watch(aiResponseServiceProvider),
   );
   ref.onDispose(controller.dispose);
@@ -136,7 +136,7 @@ final liveAssistProvider =
 
 enum ListeningStatus {
   idle('Ready when you are.'),
-  listening('Listening privately...'),
+  listening('Listening through this browser...'),
   processing('Checking the best short options...'),
   suggesting('Response options ready.'),
   paused('Paused. No audio is being processed.'),
@@ -152,7 +152,8 @@ class LiveAssistState {
     this.transcript = const [],
     this.conversationState = ConversationState.calm,
     this.suggestions = const [],
-    this.privacyMessage = 'Raw audio is off. Transcript saving is optional.',
+    this.privacyMessage =
+        'Mic audio is used for live transcription. Raw audio is not saved by Qivo.',
   });
 
   final ListeningStatus status;

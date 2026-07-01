@@ -19,13 +19,13 @@ class TranscriptPanel extends ConsumerWidget {
         children: [
           const SectionHeader(
             title: 'Live transcript',
-            subtitle: 'Speaker labels stay simple.',
+            subtitle: 'Real microphone transcript appears here.',
             action: _SaveMomentButton(),
           ),
           const SizedBox(height: 14),
           if (transcript.isEmpty)
             Text(
-              'Start listening to see a simulated transcript.',
+              'Tap the logo mic and allow microphone access to start.',
               style: Theme.of(context).textTheme.bodyMedium,
             )
           else

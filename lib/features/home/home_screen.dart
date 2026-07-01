@@ -123,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
           ),
           SizedBox(height: isMobile ? 12 : 18),
           const PrivacyNotice(
-            text: 'You control what is saved. Raw audio is off by default.',
+            text: 'You control what is saved. Raw audio is not stored by Qivo.',
           ),
         ],
       ),
