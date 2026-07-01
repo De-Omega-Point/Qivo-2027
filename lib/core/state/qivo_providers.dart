@@ -11,6 +11,7 @@ import '../../services/browser_speech_transcription_service.dart';
 import '../../services/groq_ai_response_service.dart';
 import '../../services/mock_ai_response_service.dart';
 import '../../services/mock_conversation_service.dart';
+import '../../services/mock_transcription_service.dart';
 import '../constants/app_constants.dart';
 
 final selectedNavProvider = StateProvider<QivoNavItem>((ref) => QivoNavItem.home);
