@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/state/qivo_providers.dart';
 import '../../core/theme/qivo_colours.dart';
 import '../../core/utils/responsive.dart';
