@@ -117,6 +117,13 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                   label: 'Backend connection',
                   value: backend.connectionLabel,
                 ),
+                _LogLine(label: 'Backend source', value: backend.source),
+                _LogLine(
+                  label: 'Proxy URL',
+                  value: backend.proxyUrl.isEmpty
+                      ? 'Not configured'
+                      : backend.proxyUrl,
+                ),
                 _LogLine(label: 'AI model', value: backend.model),
                 _LogLine(
                   label: 'Speech model',

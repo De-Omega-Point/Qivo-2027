@@ -40,6 +40,31 @@ flutter build web \
 
 If `QIVO_AI_PROXY_URL` is not provided, Qivo stays in mock offline mode.
 
+## Local-First Runtime Override
+
+For local backend testing, no Flutter rebuild is required. Start the proxy on
+your Mac:
+
+```sh
+cd backend
+GROQ_API_KEY=your_key QIVO_ALLOWED_ORIGINS=https://de-omega-point.github.io npm start
+```
+
+Then open Qivo, go to Settings, and enable `Use local AI proxy` in the
+`Local-first backend` card. It defaults to:
+
+```text
+http://localhost:8787
+```
+
+Settings will show `Local test` when the embedded local-first setting is active.
+
+URL overrides still work for quick testing:
+
+```text
+?qivoAiProxy=http://localhost:8787&qivoAiModel=openai/gpt-oss-20b&qivoSttModel=whisper-large-v3-turbo
+```
+
 ## Proxy Contract
 
 The Flutter app sends chat `POST` requests to:

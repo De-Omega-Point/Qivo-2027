@@ -21,7 +21,15 @@ final settingsProvider =
 );
 
 final aiBackendConfigProvider = Provider<AiBackendConfig>(
-  (ref) => AiBackendConfig.fromEnvironment(),
+  (ref) {
+    final settings = ref.watch(settingsProvider);
+    return AiBackendConfig.fromEnvironment(
+      localFirstEnabled: settings.localAiEnabled,
+      localProxyUrl: settings.localAiProxyUrl,
+      localModel: settings.localAiModel,
+      localSttModel: settings.localSttModel,
+    );
+  },
 );
 
 final aiResponseServiceProvider = Provider<AiResponseService>((ref) {
@@ -45,6 +53,10 @@ class QivoSettings {
     this.saveTranscript = true,
     this.saveSummaries = true,
     this.themeMode = 'Dark',
+    this.localAiEnabled = false,
+    this.localAiProxyUrl = 'http://localhost:8787',
+    this.localAiModel = 'openai/gpt-oss-20b',
+    this.localSttModel = 'whisper-large-v3-turbo',
   });
 
   final bool lowStimulusMode;
@@ -54,6 +66,10 @@ class QivoSettings {
   final bool saveTranscript;
   final bool saveSummaries;
   final String themeMode;
+  final bool localAiEnabled;
+  final String localAiProxyUrl;
+  final String localAiModel;
+  final String localSttModel;
 
   QivoSettings copyWith({
     bool? lowStimulusMode,
@@ -63,6 +79,10 @@ class QivoSettings {
     bool? saveTranscript,
     bool? saveSummaries,
     String? themeMode,
+    bool? localAiEnabled,
+    String? localAiProxyUrl,
+    String? localAiModel,
+    String? localSttModel,
   }) {
     return QivoSettings(
       lowStimulusMode: lowStimulusMode ?? this.lowStimulusMode,
@@ -72,6 +92,10 @@ class QivoSettings {
       saveTranscript: saveTranscript ?? this.saveTranscript,
       saveSummaries: saveSummaries ?? this.saveSummaries,
       themeMode: themeMode ?? this.themeMode,
+      localAiEnabled: localAiEnabled ?? this.localAiEnabled,
+      localAiProxyUrl: localAiProxyUrl ?? this.localAiProxyUrl,
+      localAiModel: localAiModel ?? this.localAiModel,
+      localSttModel: localSttModel ?? this.localSttModel,
     );
   }
 }
@@ -90,6 +114,14 @@ class SettingsController extends StateNotifier<QivoSettings> {
   void updateSaveSummaries(bool value) =>
       state = state.copyWith(saveSummaries: value);
   void updateThemeMode(String value) => state = state.copyWith(themeMode: value);
+  void updateLocalAiEnabled(bool value) =>
+      state = state.copyWith(localAiEnabled: value);
+  void updateLocalAiProxyUrl(String value) =>
+      state = state.copyWith(localAiProxyUrl: value);
+  void updateLocalAiModel(String value) =>
+      state = state.copyWith(localAiModel: value);
+  void updateLocalSttModel(String value) =>
+      state = state.copyWith(localSttModel: value);
 }
 
 final liveAssistProvider =

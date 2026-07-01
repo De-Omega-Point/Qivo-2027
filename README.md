@@ -62,3 +62,23 @@ GROQ_API_KEY=your_key npm start
 
 After deploying the proxy, add `QIVO_AI_PROXY_URL` as a GitHub repository
 variable so the Pages workflow builds the Flutter app against the live backend.
+
+## Local-First AI Test
+
+Run the backend on your Mac:
+
+```bash
+cd backend
+GROQ_API_KEY=your_key QIVO_ALLOWED_ORIGINS=https://de-omega-point.github.io npm start
+```
+
+Then open Qivo, go to Settings, and enable `Use local AI proxy` in the
+`Local-first backend` card. The app defaults to:
+
+```text
+http://localhost:8787
+```
+
+Settings should show `Local test`. Live Assist will call the local proxy for
+suggestions and fall back to mock suggestions if the proxy or key is not working
+yet.
