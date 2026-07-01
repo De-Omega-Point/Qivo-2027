@@ -13,6 +13,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    final backend = ref.watch(aiBackendConfigProvider);
 
     return SingleChildScrollView(
       child: LayoutBuilder(
@@ -57,6 +58,43 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           );
+          final backendCard = QivoCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SectionHeader(
+                  title: 'AI backend',
+                  subtitle: backend.connectionLabel,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    QivoStatusBadge(
+                      label: backend.providerName,
+                      color: QivoColours.aqua,
+                      icon: Icons.bolt_rounded,
+                    ),
+                    QivoStatusBadge(
+                      label: backend.model,
+                      color: QivoColours.violet,
+                      icon: Icons.auto_awesome_rounded,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  backend.isConfigured
+                      ? 'Live suggestions use the configured backend proxy. The mock service remains as a fallback if the request fails.'
+                      : 'Free-start mode is selected. Add QIVO_AI_PROXY_URL at build time after creating a small backend proxy for the Groq API key.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: QivoColours.textSecondary,
+                      ),
+                ),
+              ],
+            ),
+          );
 
           if (compact) {
             return Column(
@@ -64,6 +102,8 @@ class SettingsScreen extends ConsumerWidget {
                 const LowStimulusToggle(),
                 const SizedBox(height: 16),
                 const PrivacyControls(),
+                const SizedBox(height: 16),
+                backendCard,
                 const SizedBox(height: 16),
                 themeCard,
               ],
@@ -79,6 +119,8 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     const PrivacyControls(),
+                    const SizedBox(height: 16),
+                    backendCard,
                     const SizedBox(height: 16),
                     themeCard,
                   ],

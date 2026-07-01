@@ -28,6 +28,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     final live = ref.watch(liveAssistProvider);
+    final backend = ref.watch(aiBackendConfigProvider);
 
     return SingleChildScrollView(
       child: Column(
@@ -112,7 +113,15 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               children: [
                 const SectionHeader(title: 'Debug logs'),
                 const SizedBox(height: 12),
-                _LogLine(label: 'Backend connection', value: 'Mock offline mode'),
+                _LogLine(
+                  label: 'Backend connection',
+                  value: backend.connectionLabel,
+                ),
+                _LogLine(label: 'AI model', value: backend.model),
+                _LogLine(
+                  label: 'Speech model',
+                  value: backend.transcriptionModel,
+                ),
                 _LogLine(label: 'Listening status', value: live.status.label),
                 _LogLine(
                   label: 'Transcript messages',

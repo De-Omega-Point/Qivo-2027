@@ -6,6 +6,8 @@ import '../../models/ai_suggestion.dart';
 import '../../models/conversation_state.dart';
 import '../../models/conversation_summary.dart';
 import '../../models/transcript_message.dart';
+import '../../services/ai_backend_config.dart';
+import '../../services/groq_ai_response_service.dart';
 import '../../services/mock_ai_response_service.dart';
 import '../../services/mock_conversation_service.dart';
 import '../../services/mock_transcription_service.dart';
@@ -17,6 +19,22 @@ final settingsProvider =
     StateNotifierProvider<SettingsController, QivoSettings>(
   (ref) => SettingsController(),
 );
+
+final aiBackendConfigProvider = Provider<AiBackendConfig>(
+  (ref) => AiBackendConfig.fromEnvironment(),
+);
+
+final aiResponseServiceProvider = Provider<AiResponseService>((ref) {
+  final config = ref.watch(aiBackendConfigProvider);
+  final fallback = MockAIResponseService();
+
+  if (!config.isConfigured) return fallback;
+
+  return GroqAiResponseService(
+    config: config,
+    fallback: fallback,
+  );
+});
 
 class QivoSettings {
   const QivoSettings({
@@ -78,7 +96,7 @@ final liveAssistProvider =
     StateNotifierProvider<LiveAssistController, LiveAssistState>((ref) {
   final controller = LiveAssistController(
     transcriptionService: MockTranscriptionService(),
-    aiResponseService: MockAIResponseService(),
+    aiResponseService: ref.watch(aiResponseServiceProvider),
   );
   ref.onDispose(controller.dispose);
   return controller;
